@@ -106,4 +106,14 @@ public class ServerRouter extends Thread{
         }
         
     }
+
+    public String listaIP(){
+        String lista = "";
+
+        for(Socket s: sockets){
+            lista += s.getInetAddress().toString().replace("/", "") + "\n";
+        }
+
+        return lista.equals("") ? "non sono presenti ip disponibili" : lista;
+    }
 }
