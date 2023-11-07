@@ -38,12 +38,11 @@ public class ServerIn extends Thread{
 
             out.writeBytes("<server> invia l'indirizzo ip del destinatario con cui si vuole comunicare \n"+
                         "<server> digita /change come messaggio se si vuole cambiare destinatario dei messaggi \n" + 
+                        "<server> digita '/list' come destinatario se si vuole avere la lista di indirizzi ip disponibili \n" +
                         "<server> digita 'broadcast' come destinatario se si vuole comunicare con tutti i terminali connessi \n");
             System.out.println("ISTRUZIONI INVIATE A " + source + "\n");
 
             do{
-                
-
 
                 boolean acceptable = false;
                 String destination;
@@ -54,14 +53,21 @@ public class ServerIn extends Thread{
 
                     acceptable = validDestination(destination);
 
-                    System.out.println("VALIDITA' INDIRIZZO RICEVUTO DA " + source + " : " + acceptable + "\n");
+                    if(destination.equals("/list")){
+                        out.writeBytes(router.listaIP());
+                    }
+                    else{
+                        System.out.println("VALIDITA' INDIRIZZO RICEVUTO DA " + source + " : " + acceptable + "\n");
 
-                    if(!acceptable)
-                        out.writeBytes("<server> Destinazion non valida\n");
+                        if(!acceptable)
+                            out.writeBytes("<server> Destinazion non valida\n");
+                    }
+
+                    
                     
                 } while (!acceptable);
                 
-                out.writeBytes("<server> destinatario trovato\n");
+                out.writeBytes("<server> scelta valida\n");
 
                 while (!socket.isClosed()) {
                     
