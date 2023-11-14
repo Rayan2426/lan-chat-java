@@ -123,13 +123,13 @@ public class ServerRouter extends Thread{
     }
 
     public void removeConnection(String username){
+
+        associations.remove(username);
+
         for(String name : associations.keySet()){
                 try {
                     Socket s = associations.get(name);
                     DataOutputStream out = new DataOutputStream(s.getOutputStream());
-                    if(name.equals(username)){
-                        s.close();
-                    }
                     out.writeBytes(username + " SI E' DISCONNESSO DALLA CHAT\n");
                     associations.remove(username);
                     System.out.println("RIMOSSO IL SOCKET " + s.getInetAddress() + "\n");

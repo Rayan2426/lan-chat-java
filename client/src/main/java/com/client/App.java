@@ -2,6 +2,7 @@ package com.client;
 
 import java.io.DataOutputStream;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Scanner;
 
 public class App 
@@ -11,8 +12,20 @@ public class App
         Scanner input = new Scanner(System.in);
 
         String str = "";
+
         try {
-            Socket mySocket = new Socket("10.22.9.8",3000);
+            boolean acceptable = false;
+            Socket mySocket = new Socket();
+            do{
+                System.out.println("INSERISCI IP DEL SERVER A CUI CONNETTERSI");
+                str = input.nextLine();
+                try {
+                    mySocket = new Socket(str,3000);
+                    acceptable = true;
+                } catch (UnknownHostException e) {
+                    System.out.println("SOCKET SERVER NOT FOUND");
+                }
+            }while(!acceptable);
 
             DataOutputStream out = new DataOutputStream(mySocket.getOutputStream());
 
