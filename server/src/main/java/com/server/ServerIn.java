@@ -11,10 +11,15 @@ public class ServerIn extends Thread{
 
     private Socket socket;
     private String source;
+    private String username;
     private BufferedReader input;
     private static ArrayList<HashMap<String,String>> buffer = new ArrayList<HashMap<String,String>>();
     private static Semaforo semaforo = new Semaforo();
     private ServerRouter router;
+    private static final String instructions = "<server> digita /change come messaggio se si vuole cambiare destinatario dei messaggi \n" + 
+                        "<server> digita '/list' come destinatario se si vuole avere la lista di indirizzi ip disponibili \n" +
+                        "<server> usa il formato @USERNAME 'messaggio' per inviare un messaggio in privato a un terminale, altrimenti invierà in broadcast\n"+
+                        "<server> digita /help come destinatario per ricevere di nuovo le istruzioni d'uso\n";
 
     public ServerIn(Socket socket, ServerRouter router){
         this.socket = socket;
@@ -30,75 +35,93 @@ public class ServerIn extends Thread{
     @Override
     public void run(){
         try {
-            //AGGIUNGE IL SOCKET DI QUESTA CONNESSIONE ALLA LISTA NEL ROUTER
-            router.addConnection(socket);
+            
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             
             HashMap<String,String> packet = new HashMap<>();
 
-            out.writeBytes("<server> invia l'indirizzo ip del destinatario con cui si vuole comunicare \n"+
-                        "<server> digita /change come messaggio se si vuole cambiare destinatario dei messaggi \n" + 
-                        "<server> digita '/list' come destinatario se si vuole avere la lista di indirizzi ip disponibili \n" +
-                        "<server> digita 'broadcast' come destinatario se si vuole comunicare con tutti i terminali connessi \n");
+            out.writeBytes(instructions);
             System.out.println("ISTRUZIONI INVIATE A " + source + "\n");
 
             do{
 
                 boolean acceptable = false;
-                String destination;
 
-                do {
-                    out.writeBytes("<server> Inserire indirizzo ip del destinatario\n");
-                    destination = input.readLine();
-
-                    acceptable = validDestination(destination);
-
-                    if(destination.equals("/list")){
-                        out.writeBytes(router.listaIP());
+                do{
+                    out.writeBytes("<server> Inserire nickname valido\n");
+                    String name = input.readLine().replace(" ","");
+                    if(router.availableUsername(name) && !name.equals("") && name != null){
+                        username = name;
+                        acceptable = true;
+                    }
+                    else if(name.equals("/list")){
+                        out.writeBytes(router.lista());
+                    }
+                    else if(name.equals("/help")){
+                        out.writeBytes(instructions);
+                    }
+                    else if(name.equals("/close")){
+                        socket.close();
                     }
                     else{
-                        System.out.println("VALIDITA' INDIRIZZO RICEVUTO DA " + source + " : " + acceptable + "\n");
-
-                        if(!acceptable)
-                            out.writeBytes("<server> Destinazion non valida\n");
+                        out.writeBytes("Username " + name + " non e' disponibile!\n");
                     }
+                }while(!acceptable);
+                System.out.println(source + " HA SCELTO UN NICKNAME IDONEO");
+                //AGGIUNGE IL SOCKET DI QUESTA CONNESSIONE ALLA LISTA NEL ROUTER
+                router.addConnection(socket,username);
 
-                    
-                    
-                } while (!acceptable);
+                packet.put("source", username);
                 
                 out.writeBytes("<server> scelta valida\n");
 
                 while (!socket.isClosed()) {
                     
 
-                    packet.put("source", source);
-                    packet.put("destination", destination);
-
                     String msg = input.readLine();
                     packet.put("message", msg);
 
-                    if(!packet.get("message").equals("/change")){
+                    if(msg.equals("/change")){
                         
-                        System.out.println("MESSAGGIO RICEVUTO DA " + source + " A "+ destination + ": " + msg);
-
-                        packet.put("message","<" + source + "> " + msg + "\n");
-
-                        semaforo.P();
-
-                        buffer.add(packet);
-
-                        semaforo.V();
-
-                    }
-                    else{
                         System.out.println(source + " HA INVIATO IL COMANDO /change \n");
                         //out.writeBytes("<server> cambiando destinatario \n<server> inserire il nuovo destinatario \n");
                         break;
                     }
+                    else if(msg.equals("/list")){
+                        out.writeBytes(router.lista());
+                    }
+                    else if(msg.equals("/help")){
+                        out.writeBytes(instructions);
+                    }
+                    else if(msg.equals("/close")){
+                        socket.close();
+                    }
+                    else{
+                        String destination;
+                        destination = formatDestFromMsg(msg);
+                        msg = formatMsg(msg);
+
+                        if(msg.equals("") || msg == null){
+                            out.writeBytes("<server> messaggio inviato non valido\n");
+                        }
+                        else{
+
+                            packet.put("destination", destination);
+                            System.out.println("MESSAGGIO RICEVUTO DA " + source + " A "+ destination + ": " + msg);
+
+                            packet.put("message","<" + username + "> " + msg + "\n");
+
+                            semaforo.P();
+
+                            buffer.add(packet);
+
+                            semaforo.V();
+
+                        }
+                    }
                 }
                 if(socket.isClosed()){
-                    router.removeConnection(source);
+                    router.removeConnection(username);
                 }
 
             }while(true);
@@ -106,6 +129,27 @@ public class ServerIn extends Thread{
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    public String formatDestFromMsg(String msg){
+        String dest = "";
+
+        if(msg.startsWith("@")){
+            String split[] = msg.split(" ");
+            dest = split[0].substring(1);
+        }
+        else
+            dest = "broadcast";
+
+        return dest;
+    }
+
+    public String formatMsg(String msg){
+        String str = "";
+
+        str = msg.substring(formatDestFromMsg(msg).length()-1);
+
+        return str;
     }
 
     public static HashMap<String,String> getFirstPacketInBuffer(){
@@ -145,14 +189,6 @@ public class ServerIn extends Thread{
             }
 
         return cont;
-    }
-
-    private boolean validDestination(String destination){
-        
-        if(validIP(destination) || destination.equals("broadcast"))
-            return true;
-
-        return false;
     }
 
     private boolean validIP (String ip) {
