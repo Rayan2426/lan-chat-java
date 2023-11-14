@@ -133,7 +133,6 @@ public class ServerRouter extends Thread{
                     out.writeBytes(username + " SI E' DISCONNESSO DALLA CHAT\n");
                     associations.remove(username);
                     System.out.println("RIMOSSO IL SOCKET " + s.getInetAddress() + "\n");
-                    return;
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }

@@ -16,7 +16,7 @@ public class ServerIn extends Thread{
     private static ArrayList<HashMap<String,String>> buffer = new ArrayList<HashMap<String,String>>();
     private static Semaforo semaforo = new Semaforo();
     private ServerRouter router;
-    private static final String instructions = "<server> digita /change come messaggio se si vuole cambiare destinatario dei messaggi \n" + 
+    private static final String instructions = "<server> digita /close per disconnettersi dalla chat \n" + 
                         "<server> digita '/list' come destinatario se si vuole avere la lista di indirizzi ip disponibili \n" +
                         "<server> usa il formato @USERNAME 'messaggio' per inviare un messaggio in privato a un terminale, altrimenti invierà in broadcast\n"+
                         "<server> digita /help come destinatario per ricevere di nuovo le istruzioni d'uso\n";
@@ -69,8 +69,10 @@ public class ServerIn extends Thread{
                     }
                 }while(!acceptable);
                 System.out.println(source + " HA SCELTO UN NICKNAME IDONEO");
-                //AGGIUNGE IL SOCKET DI QUESTA CONNESSIONE ALLA LISTA NEL ROUTER
-                router.addConnection(socket,username);
+
+                if(!socket.isClosed())
+                    //AGGIUNGE IL SOCKET DI QUESTA CONNESSIONE ALLA LISTA NEL ROUTER
+                    router.addConnection(socket,username);
 
                 packet.put("source", username);
                 
