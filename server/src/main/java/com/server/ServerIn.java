@@ -105,7 +105,6 @@ public class ServerIn extends Thread{
                             out.writeBytes("<server> messaggio inviato non valido\n");
                         }
                         else{
-
                             packet.put("destination", destination);
                             System.out.println("MESSAGGIO RICEVUTO DA " + source + " A "+ destination + ": " + msg);
 
@@ -116,7 +115,6 @@ public class ServerIn extends Thread{
                             buffer.add(packet);
 
                             semaforo.V();
-
                         }
                     }
                 }
@@ -147,7 +145,11 @@ public class ServerIn extends Thread{
     public String formatMsg(String msg){
         String str = "";
 
-        str = msg.substring(formatDestFromMsg(msg).length()-1);
+        if(msg.startsWith("@") && !msg.equals("") && msg != null)
+            str = msg.substring(formatDestFromMsg(msg).length()+1).trim();
+        else{
+            str = msg;
+        }
 
         return str;
     }
