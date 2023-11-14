@@ -109,22 +109,35 @@ public class ServerRouter extends Thread{
 
     public void addConnection(Socket socket, String username){
         associations.put(username, socket);
+        for(String user : associations.keySet()){
+            if (!user.equals(username)) {
+                try {
+                    DataOutputStream out = new DataOutputStream(associations.get(user).getOutputStream());
+                    out.writeBytes("L'utente " + username + " si e' connesso alla chat!\n");
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+        }
         sockets.add(socket);
     }
 
     public void removeConnection(String username){
         for(String name : associations.keySet()){
-            if(name.equals(username)){
                 try {
                     Socket s = associations.get(name);
-                    s.close();
-                    associations.remove(name);
+                    DataOutputStream out = new DataOutputStream(s.getOutputStream());
+                    if(name.equals(username)){
+                        s.close();
+                    }
+                    out.writeBytes(username + " SI E' DISCONNESSO DALLA CHAT\n");
+                    associations.remove(username);
                     System.out.println("RIMOSSO IL SOCKET " + s.getInetAddress() + "\n");
                     return;
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
-            }
+            
         }
         
     }
@@ -136,6 +149,6 @@ public class ServerRouter extends Thread{
             lista += user + ":" + associations.get(user).getInetAddress().toString().replace("/", "") + "\n";
         }
 
-        return lista.equals("") ? "non sono presenti ip disponibili" : lista;
+        return lista.equals("") ? "non sono presenti ip disponibili\n" : lista;
     }
 }

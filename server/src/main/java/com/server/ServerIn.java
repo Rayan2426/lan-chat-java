@@ -41,6 +41,7 @@ public class ServerIn extends Thread{
             HashMap<String,String> packet = new HashMap<>();
 
             out.writeBytes(instructions);
+            out.writeBytes("Lista di utenti online: \n" + router.lista());
             System.out.println("ISTRUZIONI INVIATE A " + source + "\n");
 
             do{
