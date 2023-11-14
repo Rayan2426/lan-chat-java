@@ -37,7 +37,7 @@ public class App
 
         String str = "";
         try {
-            Socket mySocket = new Socket("localhost",3000);
+            Socket mySocket = new Socket("10.22.9.8",3000);
 
             DataOutputStream out = new DataOutputStream(mySocket.getOutputStream());
 
@@ -50,9 +50,9 @@ public class App
                 out.writeBytes(str+"\n");
                 
             }
-            
+            mySocket.close();
         } catch (Exception e) {
-            
+            System.out.println(e.getMessage());
         }
 
         input.close();

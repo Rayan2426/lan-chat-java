@@ -97,6 +97,9 @@ public class ServerIn extends Thread{
                         break;
                     }
                 }
+                if(socket.isClosed()){
+                    router.removeConnection(source);
+                }
 
             }while(true);
 
@@ -137,7 +140,7 @@ public class ServerIn extends Thread{
             
                 if (index != -1) {
                     cont++;
-                    index += "=".length();
+                    index += 1;
                 }
             }
 

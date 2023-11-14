@@ -95,10 +95,12 @@ public class ServerRouter extends Thread{
 
     public void removeConnection(String address){
         for(Socket s : sockets){
-            if(address.contains(s.getInetAddress().toString())){
+            if(address.contains(s.getInetAddress().toString()) || s.getInetAddress().toString().contains(address)){
                 try {
                     sockets.remove(s);
+                    System.out.println("RIMOSSO IL SOCKET " + s.getInetAddress() + "\n");
                     s.close();
+                    return;
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }

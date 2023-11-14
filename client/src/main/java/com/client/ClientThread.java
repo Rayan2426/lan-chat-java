@@ -21,7 +21,6 @@ public class ClientThread extends Thread{
 
                 System.out.println(input);
             }
-            socket.close();
         } catch (Exception e) {
             
         }
