@@ -84,13 +84,7 @@ public class ServerIn extends Thread{
                     String msg = input.readLine();
                     packet.put("message", msg);
 
-                    if(msg.equals("/change")){
-                        
-                        System.out.println(source + " HA INVIATO IL COMANDO /change \n");
-                        //out.writeBytes("<server> cambiando destinatario \n<server> inserire il nuovo destinatario \n");
-                        break;
-                    }
-                    else if(msg.equals("/list")){
+                    if(msg.equals("/list")){
                         out.writeBytes(router.lista());
                     }
                     else if(msg.equals("/help")){
@@ -111,7 +105,13 @@ public class ServerIn extends Thread{
                             packet.put("destination", destination);
                             System.out.println("MESSAGGIO RICEVUTO DA " + source + " A "+ destination + ": " + msg);
 
-                            packet.put("message","<" + username + "> " + msg + "\n");
+                            if(destination.equals("broadcast"))
+                                msg = "<" + username + "(BROADCAST)> " + msg + "\n";
+                            else
+                                msg = "<" + username + "> " + msg + "\n";
+
+
+                            packet.put("message",msg);
 
                             semaforo.P();
 
