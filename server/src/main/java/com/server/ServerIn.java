@@ -48,10 +48,11 @@ public class ServerIn extends Thread{
             out.writeBytes("Lista di utenti online: \n" + router.lista());
             System.out.println("ISTRUZIONI INVIATE A " + source + "\n");
 
+            //LOOP CHE SI INTERROMPE QUANDO IL NICKNAME INSERITO DALL'UTENTE E' VALIDO
             do{
 
                 boolean acceptable = false;
-
+                
                 do{
                     out.writeBytes(CYAN + "<server> Inserire nickname valido" + RESET + "\n");
                     String name = input.readLine().replace(" ","");
@@ -82,12 +83,13 @@ public class ServerIn extends Thread{
                 
                 out.writeBytes(CYAN  + "<server> scelta valida" + RESET + "\n");
 
+                //MANTIENE LA CONNESSIONE FINCHE' NON VIENE CHIUSO
                 while (!socket.isClosed()) {
                     
-
+                    //LETTURA MESSAGGIO
                     String msg = input.readLine();
                     packet.put("message", msg);
-
+                    //COMANDI DISPONIBILI
                     if(msg.equals("/list")){
                         out.writeBytes(router.lista());
                     }
@@ -98,6 +100,7 @@ public class ServerIn extends Thread{
                         socket.close();
                     }
                     else{
+                        //EXTRACTS DESTINATION FROM THE MESSAGE APPLYING THE PROTOCOL IN USE
                         String destination;
                         destination = formatDestFromMsg(msg);
                         msg = formatMsg(msg);
@@ -118,7 +121,7 @@ public class ServerIn extends Thread{
                             packet.put("message",msg);
 
                             semaforo.P();
-
+                            //ADDS THE PACKET WITH THE MESSAGE, SOURCE AND DESTINATION INTO A BUFFER THAT THE ROUTER WILL READ
                             buffer.add(packet);
 
                             semaforo.V();
@@ -136,6 +139,7 @@ public class ServerIn extends Thread{
         }
     }
 
+    //RETURNS DESTINATION FROM MESSAGE APPLYING THE RULES OF THE PROTOCOL
     public String formatDestFromMsg(String msg){
         String dest = "";
 

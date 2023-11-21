@@ -31,6 +31,7 @@ public class ServerRouter extends Thread{
 
 
             System.out.println("TROVATO PACCHETTO DA " + packet.get("source") + " A " + packet.get("destination"));
+            //RIMUOVE DAL BUFFER IL PACCHETTO APPENA LETTO
             ServerIn.removeFirstPacketInBuffer();
             
             //TROVA IL SOCKET DI DESTINAZIONE
@@ -48,6 +49,7 @@ public class ServerRouter extends Thread{
                     System.out.println(e.getMessage());
                 }
             }
+            //SE IL MESSAGGIO E' DA MANDARE IN BROADCAST
             else if(packet.get("destination").equals("broadcast")){
                 for(String user: associations.keySet()){
                     if(!user.equals(packet.get("source"))){
@@ -83,6 +85,7 @@ public class ServerRouter extends Thread{
         }
     }
 
+    //controlla disponibilità del nome
     public boolean availableUsername(String username){
 
         if(username.startsWith("/") || username.startsWith("'\'"))
@@ -96,6 +99,7 @@ public class ServerRouter extends Thread{
         return true;
     }
 
+    //trova una socket in base all'username associato
     public Socket findSocket(String username){
         Socket s = null;
 
@@ -110,6 +114,7 @@ public class ServerRouter extends Thread{
         return s;
     }
 
+    //aggiunge una connessione al router e notifica gli altri utenti
     public void addConnection(Socket socket, String username){
         associations.put(username, socket);
         for(String user : associations.keySet()){
@@ -125,6 +130,7 @@ public class ServerRouter extends Thread{
         sockets.add(socket);
     }
 
+    //rimuove una connessione dal router e notifica gli altri utenti
     public void removeConnection(String username){
 
         associations.remove(username);
@@ -144,6 +150,7 @@ public class ServerRouter extends Thread{
         
     }
 
+    //ritorna una lista degli utenti connessi
     public String lista(){
         String lista = "";
 
