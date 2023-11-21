@@ -14,15 +14,18 @@ public class ClientThread extends Thread{
     @Override
     public void run(){
         try {
+            //input stream
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
             String input = "";
             while (!input.equals("/close")) {
+                //message sent from server, if it equals to '/close' it ends the loop
                 input = in.readLine();
 
                 System.out.println(input);
             }
         } catch (Exception e) {
-            
+            System.out.println(e.getMessage());
         }
     }
     

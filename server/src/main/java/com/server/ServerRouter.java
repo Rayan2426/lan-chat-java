@@ -9,6 +9,9 @@ public class ServerRouter extends Thread{
     //list of all the current operative sockets
     private ArrayList<Socket> sockets;
     private HashMap<String, Socket> associations;
+    private static final String RED = "\u001B[31m";
+    private static final String GREEN = "\u001B[32m";
+    private static final String RESET = "\u001B[0m";
 
     public ServerRouter(){
         this.associations = new HashMap<>();
@@ -113,7 +116,7 @@ public class ServerRouter extends Thread{
             if (!user.equals(username)) {
                 try {
                     DataOutputStream out = new DataOutputStream(associations.get(user).getOutputStream());
-                    out.writeBytes("L'utente " + username + " si e' connesso alla chat!\n");
+                    out.writeBytes(GREEN + "L'utente " + username + " si e' connesso alla chat!" + RESET + "\n");
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
@@ -130,7 +133,7 @@ public class ServerRouter extends Thread{
                 try {
                     Socket s = associations.get(name);
                     DataOutputStream out = new DataOutputStream(s.getOutputStream());
-                    out.writeBytes(username + " SI E' DISCONNESSO DALLA CHAT\n");
+                    out.writeBytes(RED + username + " SI E' DISCONNESSO DALLA CHAT" + RESET + "\n");
                     associations.remove(username);
                     System.out.println("RIMOSSO IL SOCKET " + s.getInetAddress() + "\n");
                 } catch (Exception e) {

@@ -14,10 +14,12 @@ public class App
         String str = "";
 
         try {
+            //becomes true if server is found
             boolean acceptable = false;
             Socket mySocket = new Socket();
             do{
                 System.out.println("INSERISCI IP DEL SERVER A CUI CONNETTERSI");
+                //ip from keyboard input
                 str = input.nextLine();
                 try {
                     mySocket = new Socket(str,3000);
@@ -27,13 +29,16 @@ public class App
                 }
             }while(!acceptable);
 
+            //output stream
             DataOutputStream out = new DataOutputStream(mySocket.getOutputStream());
 
 
+            //thread for concurrent execution of input reading
             ClientThread thread = new ClientThread(mySocket);
 
             thread.start();
             while(!str.equals("/close")){
+                //message sent to server, if string equals to '/close' it closes the connection
                 str = input.nextLine();
                 out.writeBytes(str+"\n");
             }

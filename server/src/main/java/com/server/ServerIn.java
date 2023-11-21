@@ -16,10 +16,14 @@ public class ServerIn extends Thread{
     private static ArrayList<HashMap<String,String>> buffer = new ArrayList<HashMap<String,String>>();
     private static Semaforo semaforo = new Semaforo();
     private ServerRouter router;
-    private static final String instructions = "<server> digita /close per disconnettersi dalla chat \n" + 
+    private static final String CYAN = "\u001B[36m";
+    private static final String YELLOW = "\u001B[33m";
+    private static final String RESET = "\u001B[0m";
+
+    private static final String instructions = CYAN + "<server> digita /close per disconnettersi dalla chat \n" + 
                         "<server> digita '/list' come destinatario se si vuole avere la lista di indirizzi ip disponibili \n" +
                         "<server> usa il formato @USERNAME 'messaggio' per inviare un messaggio in privato a un terminale, altrimenti invierà in broadcast\n"+
-                        "<server> digita /help come destinatario per ricevere di nuovo le istruzioni d'uso\n";
+                        "<server> digita /help come destinatario per ricevere di nuovo le istruzioni d'uso \u001B[0m "+ RESET +"\n";
 
     public ServerIn(Socket socket, ServerRouter router){
         this.socket = socket;
@@ -49,7 +53,7 @@ public class ServerIn extends Thread{
                 boolean acceptable = false;
 
                 do{
-                    out.writeBytes("<server> Inserire nickname valido\n");
+                    out.writeBytes(CYAN + "<server> Inserire nickname valido" + RESET + "\n");
                     String name = input.readLine().replace(" ","");
                     if(router.availableUsername(name) && !name.equals("") && name != null){
                         username = name;
@@ -76,7 +80,7 @@ public class ServerIn extends Thread{
 
                 packet.put("source", username);
                 
-                out.writeBytes("<server> scelta valida\n");
+                out.writeBytes(CYAN  + "<server> scelta valida" + RESET + "\n");
 
                 while (!socket.isClosed()) {
                     
@@ -99,14 +103,14 @@ public class ServerIn extends Thread{
                         msg = formatMsg(msg);
 
                         if(msg.equals("") || msg == null){
-                            out.writeBytes("<server> messaggio inviato non valido\n");
+                            out.writeBytes(CYAN + "<server> messaggio inviato non valido" + RESET + "\n");
                         }
                         else{
                             packet.put("destination", destination);
                             System.out.println("MESSAGGIO RICEVUTO DA " + source + " A "+ destination + ": " + msg);
 
                             if(destination.equals("broadcast"))
-                                msg = "<" + username + "(BROADCAST)> " + msg + "\n";
+                                msg = YELLOW + "<" + username + "(BROADCAST)> " + msg + "\n" + RESET;
                             else
                                 msg = "<" + username + "> " + msg + "\n";
 
@@ -196,7 +200,7 @@ public class ServerIn extends Thread{
         return cont;
     }
 
-    private boolean validIP (String ip) {
+    /*private boolean validIP (String ip) {
         try {
             if ( ip == null || ip.isEmpty() ) {
                 return false;
@@ -221,5 +225,5 @@ public class ServerIn extends Thread{
         } catch (NumberFormatException nfe) {
             return false;
         }
-    }
+    }*/
 }
