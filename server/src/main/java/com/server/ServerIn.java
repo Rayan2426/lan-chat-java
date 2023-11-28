@@ -22,8 +22,8 @@ public class ServerIn extends Thread{
 
     private static final String instructions = CYAN + "<server> digita /close per disconnettersi dalla chat \n" + 
                         "<server> digita '/list' come destinatario se si vuole avere la lista di indirizzi ip disponibili \n" +
-                        "<server> usa il formato @USERNAME 'messaggio' per inviare un messaggio in privato a un terminale, altrimenti invierà in broadcast\n"+
-                        "<server> digita /help come destinatario per ricevere di nuovo le istruzioni d'uso \u001B[0m "+ RESET +"\n";
+                        "<server> usa il formato @USERNAME 'messaggio' per inviare un messaggio in privato a un terminale, altrimenti inviera' in broadcast\n"+
+                        "<server> digita /help come destinatario per ricevere di nuovo le istruzioni d'uso"+ RESET +"\n";
 
     public ServerIn(Socket socket, ServerRouter router){
         this.socket = socket;
@@ -113,7 +113,7 @@ public class ServerIn extends Thread{
                             System.out.println("MESSAGGIO RICEVUTO DA " + source + " A "+ destination + ": " + msg);
 
                             if(destination.equals("broadcast"))
-                                msg = YELLOW + "<" + username + "(BROADCAST)> " + msg + "\n" + RESET;
+                                msg = YELLOW + "<" + username + "(BROADCAST)> " + msg +  RESET +"\n";
                             else
                                 msg = "<" + username + "> " + msg + "\n";
 

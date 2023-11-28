@@ -92,7 +92,7 @@ public class ServerRouter extends Thread{
             return false;
 
         for(String name : associations.keySet()){
-            if(name.equals(username))
+            if(name.toLowerCase().equals(username.toLowerCase()))
                 return false;
         }
 
