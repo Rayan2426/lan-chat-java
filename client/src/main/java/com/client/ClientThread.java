@@ -9,13 +9,8 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
 public class ClientThread extends Thread{
-    // to store current position 
-    Long currentFrame; 
     Clip clip;
-      
-    // current status of clip 
-    String status; 
-      
+
     AudioInputStream audioInputStream; 
     static String filePath = "newmessage.au"; 
 
@@ -25,14 +20,13 @@ public class ClientThread extends Thread{
         this.socket = socket;
         try {
             // create AudioInputStream object 
-        audioInputStream =  
-                AudioSystem.getAudioInputStream(new File(filePath).getAbsoluteFile()); 
-          
-        // create clip reference 
-        clip = AudioSystem.getClip(); 
-          
-        // open audioInputStream to the clip 
-        clip.open(audioInputStream); 
+            audioInputStream = AudioSystem.getAudioInputStream(new File(filePath).getAbsoluteFile()); 
+            
+            // create clip reference 
+            clip = AudioSystem.getClip(); 
+            
+            // open audioInputStream to the clip 
+            clip.open(audioInputStream); 
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -59,7 +53,6 @@ public class ClientThread extends Thread{
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
-                currentFrame = 0L; 
                 clip.setMicrosecondPosition(0); 
                 clip.start(); 
             }
