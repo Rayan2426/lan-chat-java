@@ -7,10 +7,34 @@ import java.util.Scanner;
 
 public class App 
 {
+    private static String instructions = "\u001B[36m<server> digita /close per disconnettersi dalla chat \n" + 
+                        "<server> digita '/list' come destinatario se si vuole avere la lista di indirizzi ip disponibili \n" +
+                        "<server> usa il formato @USERNAME 'messaggio' per inviare un messaggio in privato a un terminale, altrimenti inviera' in broadcast\n"+
+                        "<server> digita /help come destinatario per ricevere di nuovo le istruzioni d'uso \u001B[0m \n";
+    private static boolean localCommand(String cmd){
+        switch(cmd){
+            case("/help"):
+                System.out.println(instructions);
+                return true;
+        }
+        return false;
+    }
+    private static String protocolConversion(String p){
+        switch(p){
+            case("/close"):
+                p = "!c";
+                break;
+            case("/list"):
+                p = "!l";
+                break;
+        }
+
+        return p;
+    }
     public static void main( String[] args )
     {
         Scanner input = new Scanner(System.in);
-
+        
         String str = "";
 
         try {
@@ -38,9 +62,15 @@ public class App
 
             thread.start();
             while(!str.equals("/close")){
+                //prints instructions
+                System.out.println(instructions);
                 //message sent to server, if string equals to '/close' it closes the connection
                 str = input.nextLine();
-                out.writeBytes(str+"\n");
+                if(!localCommand(str)){
+                    str = protocolConversion(str);
+                    out.writeBytes(str+"\n");
+                }
+                
             }
             mySocket.close();
         } catch (Exception e) {
@@ -50,3 +80,4 @@ public class App
         input.close();
     }
 }
+
