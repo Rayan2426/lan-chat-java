@@ -9,9 +9,6 @@ public class ServerRouter extends Thread{
     //list of all the current operative sockets
     private ArrayList<Socket> sockets;
     private HashMap<String, Socket> associations;
-    private static final String RED = "\u001B[31m";
-    private static final String GREEN = "\u001B[32m";
-    private static final String RESET = "\u001B[0m";
 
     public ServerRouter(){
         this.associations = new HashMap<>();
@@ -42,7 +39,7 @@ public class ServerRouter extends Thread{
                 System.out.println("SOCKET TROVATO\n");
                 try {
                     DataOutputStream out = new DataOutputStream(s.getOutputStream());
-                    out.writeBytes(packet.get("message"));
+                    out.writeBytes("!m" + packet.get("source") + ":" + packet.get("message") + "\n");
                     System.out.println("MESSAGGIO INVIATO AL DESTINATARIO\n");
                 } catch (Exception e) {
                     System.out.println("INVIO AL MITTENTE NON RIUSCITO\n");
@@ -55,7 +52,7 @@ public class ServerRouter extends Thread{
                     if(!user.equals(packet.get("source"))){
                         try {
                             DataOutputStream out = new DataOutputStream(associations.get(user).getOutputStream());
-                            out.writeBytes(packet.get("message"));
+                            out.writeBytes("!b" + packet.get("source") + ":" + packet.get("message") + "\n");
                         } catch (Exception e) {
                             System.out.println("INVIO IN BROADCAST FALLITO");
                             System.out.println(e.getMessage());
@@ -78,17 +75,35 @@ public class ServerRouter extends Thread{
                         System.out.println("SOCKET SOURCE DI "+ packet.get("source") +" NON TROVATO\n");
                     System.out.println(e.getMessage());
                 }
-                
-                
             }
-
         }
     }
 
     //controlla disponibilità del nome
     public boolean availableUsername(String username){
 
-        if(username.startsWith("/") || username.startsWith("'\'"))
+        if(username == null ||
+        username.contains("/") ||
+        username.contains("'\'")  ||
+        username.equals("") ||
+        username.contains(",") ||
+        username.contains(";") ||
+        username.contains("()") ||
+        username.contains(")") ||
+        username.contains("[]") ||
+        username.contains("]") ||
+        username.contains("{}") ||
+        username.contains("}") ||
+        username.contains("*") ||
+        username.contains("|") ||
+        username.contains("&") ||
+        username.contains("'") ||
+        username.contains("\"") ||
+        username.contains(">") ||
+        username.contains("<") ||
+        username.contains(":") ||
+        username.contains("+")
+        )
             return false;
 
         for(String name : associations.keySet()){
@@ -121,7 +136,7 @@ public class ServerRouter extends Thread{
             if (!user.equals(username)) {
                 try {
                     DataOutputStream out = new DataOutputStream(associations.get(user).getOutputStream());
-                    out.writeBytes(GREEN + "L'utente " + username + " si e' connesso alla chat!" + RESET + "\n");
+                    out.writeBytes("!j" + username + "\n");
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
@@ -139,9 +154,9 @@ public class ServerRouter extends Thread{
                 try {
                     Socket s = associations.get(name);
                     DataOutputStream out = new DataOutputStream(s.getOutputStream());
-                    out.writeBytes(RED + username + " SI E' DISCONNESSO DALLA CHAT" + RESET + "\n");
+                    out.writeBytes("!d" + username + "\n");
                     associations.remove(username);
-                    System.out.println("RIMOSSO IL SOCKET " + s.getInetAddress() + "\n");
+                    System.out.println("RIMOSSO IL SOCKET " + s.getInetAddress() + " di " + username + "\n");
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
@@ -155,9 +170,9 @@ public class ServerRouter extends Thread{
         String lista = "";
 
         for(String user: associations.keySet()){
-            lista += user + ":" + associations.get(user).getInetAddress().toString().replace("/", "") + "\n";
+            lista += user + "," + associations.get(user).getInetAddress().toString().replace("/", "") + ";";
         }
 
-        return lista.equals("") ? "non sono presenti ip disponibili\n" : lista;
+        return lista.equals("") ? "!l0\n" : "!l" + lista + "\n";
     }
 }

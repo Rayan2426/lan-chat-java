@@ -22,14 +22,14 @@ public class App
     private static String protocolConversion(String p){
         switch(p){
             case("/close"):
-                p = "!c";
+                p = "?c";
                 break;
             case("/list"):
-                p = "!l";
+                p = "?l";
                 break;
         }
 
-        return p;
+        return p + "\n";
     }
     public static void main( String[] args )
     {
@@ -56,22 +56,29 @@ public class App
             //output stream
             DataOutputStream out = new DataOutputStream(mySocket.getOutputStream());
 
+            
 
             //thread for concurrent execution of input reading
             ClientThread thread = new ClientThread(mySocket);
 
             thread.start();
-            while(!str.equals("/close")){
-                //prints instructions
-                System.out.println(instructions);
-                //message sent to server, if string equals to '/close' it closes the connection
+
+            //prints instructions
+            System.out.println(instructions);
+            out.writeBytes("?l\n");
+
+            while(!str.equals("?c") || !str.equals("/close")){
+                
+                //message sent to server, if string equals to '?c', which occurs when the input message is '/close', it closes the connection
                 str = input.nextLine();
+
                 if(!localCommand(str)){
                     str = protocolConversion(str);
-                    out.writeBytes(str+"\n");
+                    out.writeBytes(str);
                 }
                 
             }
+            thread.join();
             mySocket.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());

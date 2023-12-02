@@ -16,14 +16,6 @@ public class ServerIn extends Thread{
     private static ArrayList<HashMap<String,String>> buffer = new ArrayList<HashMap<String,String>>();
     private static Semaforo semaforo = new Semaforo();
     private ServerRouter router;
-    private static final String CYAN = "\u001B[36m";
-    private static final String YELLOW = "\u001B[33m";
-    private static final String RESET = "\u001B[0m";
-
-    private static final String instructions = CYAN + "<server> digita /close per disconnettersi dalla chat \n" + 
-                        "<server> digita '/list' come destinatario se si vuole avere la lista di indirizzi ip disponibili \n" +
-                        "<server> usa il formato @USERNAME 'messaggio' per inviare un messaggio in privato a un terminale, altrimenti inviera' in broadcast\n"+
-                        "<server> digita /help come destinatario per ricevere di nuovo le istruzioni d'uso"+ RESET +"\n";
 
     public ServerIn(Socket socket, ServerRouter router){
         this.socket = socket;
@@ -44,33 +36,30 @@ public class ServerIn extends Thread{
             
             HashMap<String,String> packet = new HashMap<>();
 
-            out.writeBytes(instructions);
-            out.writeBytes("Lista di utenti online: \n" + router.lista());
             System.out.println("ISTRUZIONI INVIATE A " + source + "\n");
 
             //LOOP CHE SI INTERROMPE QUANDO IL NICKNAME INSERITO DALL'UTENTE E' VALIDO
             do{
 
                 boolean acceptable = false;
-                
+                out.writeBytes("?n\n");
                 do{
-                    out.writeBytes(CYAN + "<server> Inserire nickname valido" + RESET + "\n");
+                    
                     String name = input.readLine().replace(" ","");
-                    if(router.availableUsername(name) && !name.equals("") && name != null){
+                    if(name.equals("?l")){
+                        out.writeBytes(router.lista());
+                    }
+                    else if(name.equals("?c")){
+                        out.writeBytes("!c");
+                        router.removeConnection(username);
+                        socket.close();
+                    }
+                    else if(router.availableUsername(name)){
                         username = name;
                         acceptable = true;
                     }
-                    else if(name.equals("/list")){
-                        out.writeBytes(router.lista());
-                    }
-                    else if(name.equals("/help")){
-                        out.writeBytes(instructions);
-                    }
-                    else if(name.equals("/close")){
-                        socket.close();
-                    }
                     else{
-                        out.writeBytes("Username " + name + " non e' disponibile!\n");
+                        out.writeBytes(":n\n");
                     }
                 }while(!acceptable);
                 System.out.println(source + " HA SCELTO UN NICKNAME IDONEO");
@@ -81,7 +70,7 @@ public class ServerIn extends Thread{
 
                 packet.put("source", username);
                 
-                out.writeBytes(CYAN  + "<server> scelta valida" + RESET + "\n");
+                out.writeBytes("!n\n");
 
                 //MANTIENE LA CONNESSIONE FINCHE' NON VIENE CHIUSO
                 while (!socket.isClosed()) {
@@ -90,13 +79,12 @@ public class ServerIn extends Thread{
                     String msg = input.readLine();
                     packet.put("message", msg);
                     //COMANDI DISPONIBILI
-                    if(msg.equals("/list")){
+                    if(msg.equals("?l")){
                         out.writeBytes(router.lista());
                     }
-                    else if(msg.equals("/help")){
-                        out.writeBytes(instructions);
-                    }
-                    else if(msg.equals("/close")){
+                    else if(msg.equals("?c")){
+                        out.writeBytes("!c");
+                        router.removeConnection(username);
                         socket.close();
                     }
                     else{
@@ -106,17 +94,11 @@ public class ServerIn extends Thread{
                         msg = formatMsg(msg);
 
                         if(msg.equals("") || msg == null){
-                            out.writeBytes(CYAN + "<server> messaggio inviato non valido" + RESET + "\n");
+                            out.writeBytes("!e");
                         }
                         else{
                             packet.put("destination", destination);
                             System.out.println("MESSAGGIO RICEVUTO DA " + source + " A "+ destination + ": " + msg);
-
-                            if(destination.equals("broadcast"))
-                                msg = YELLOW + "<" + username + "(BROADCAST)> " + msg +  RESET +"\n";
-                            else
-                                msg = "<" + username + "> " + msg + "\n";
-
 
                             packet.put("message",msg);
 
@@ -127,9 +109,6 @@ public class ServerIn extends Thread{
                             semaforo.V();
                         }
                     }
-                }
-                if(socket.isClosed()){
-                    router.removeConnection(username);
                 }
 
             }while(true);
