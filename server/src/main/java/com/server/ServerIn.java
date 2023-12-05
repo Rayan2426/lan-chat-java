@@ -45,7 +45,7 @@ public class ServerIn extends Thread{
                 out.writeBytes("?n\n");
                 do{
                     
-                    String name = input.readLine().replace(" ","");
+                    String name = input.readLine().substring(2).replace(" ","");
                     if(name.equals("?l")){
                         out.writeBytes(router.lista());
                     }
@@ -76,7 +76,7 @@ public class ServerIn extends Thread{
                 while (!socket.isClosed()) {
                     
                     //LETTURA MESSAGGIO
-                    String msg = input.readLine();
+                    String msg = input.readLine().substring(2);
                     packet.put("message", msg);
                     //COMANDI DISPONIBILI
                     if(msg.equals("?l")){

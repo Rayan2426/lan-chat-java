@@ -74,7 +74,7 @@ public class App
 
                 if(!localCommand(str)){
                     str = protocolConversion(str);
-                    out.writeBytes(str);
+                    out.writeBytes("!m"+str);
                 }
                 
             }
